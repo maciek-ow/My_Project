@@ -13,6 +13,7 @@ resource "aws_subnet" "public" {
   vpc_id            = aws_vpc.main.id
   cidr_block        = "10.0.1.0/24"
   availability_zone = "eu-central-1a"
+  map_public_ip_on_launch = true
   tags = {
     Name = "Public-Subnet"
   }
@@ -69,13 +70,22 @@ resource "aws_security_group" "webapp_sg" {
 }
 
 resource "aws_instance" "webapp" {
-  ami                    = "ami-01e70a605ecda527e" # Red Hat Enterprise Linux 10 (HVM)
+  ami                    = "ami-0009730fa04f166e2" # Alma linux
   instance_type          = "t2.micro"
   subnet_id              = aws_subnet.public.id
   vpc_security_group_ids = [aws_security_group.webapp_sg.id]
+  associate_public_ip_address = true
   key_name               = aws_key_pair.webapp_key.key_name
 
   tags = {
     Name = "WebApp-Server"
   }
+}
+
+resource "local_file" "ansible_inventory" {
+  filename = "../ansible_files/inventories/inventory.ini" 
+  content  = <<-EOT
+    [webapp]  
+    ec2-instance-webapp ansible_host=${aws_instance.webapp.public_ip} 
+  EOT
 }

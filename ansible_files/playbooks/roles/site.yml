@@ -1,0 +1,10 @@
+- vars_files:
+    - My_project/ansible_files/vault.yml
+
+- tasks:
+
+  - name: Register RHEL on EC2
+    hosts: webapp
+    become: yes
+    roles:
+      - register_rhel_subscription
