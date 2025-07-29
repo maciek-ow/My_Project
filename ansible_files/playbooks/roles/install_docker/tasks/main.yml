@@ -1,0 +1,13 @@
+- name: Set up docker repository
+  shell: |
+    dnf install -y yum-utils
+    yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+
+- name: Install the latest version of Docker Engine and containerd
+  dnf:
+    name:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+      - docker-compose-plugin
+  notify: Start and enable docker

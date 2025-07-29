@@ -1,9 +1,21 @@
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 4.16"
+    }
+  }
+
+  required_version = ">= 1.2.0"
+}
 provider "aws" {
   region = var.region
 }
 
 resource "aws_vpc" "main" {
   cidr_block = "10.0.0.0/16"
+  enable_dns_hostnames = true
+  enable_dns_support = true
   tags = {
     Name = "WebApp-VPC"
   }
@@ -11,7 +23,7 @@ resource "aws_vpc" "main" {
 
 resource "aws_subnet" "public" {
   vpc_id            = aws_vpc.main.id
-  cidr_block        = "10.0.1.0/24"
+  cidr_block        = "10.0.0.0/24"
   availability_zone = "eu-central-1a"
   map_public_ip_on_launch = true
   tags = {
@@ -23,9 +35,22 @@ resource "aws_internet_gateway" "gw" {
   vpc_id = aws_vpc.main.id
 }
 
+resource "aws_route_table" "public" {
+  vpc_id = aws_vpc.main.id
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.gw.id
+  }
+}
+
+resource "aws_route_table_association" "a" {
+  subnet_id      = aws_subnet.public.id
+  route_table_id = aws_route_table.public.id
+}
+
 resource "aws_key_pair" "webapp_key" {
-  key_name   = "webapp-key"
-  public_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCkjT0Yt6eoCpZ1cXySGEAInLEs3+IIylNZo7Tpsp0d0EaZgr6gWTBlxh9W1SLCGLX4WEG9u8F80rWCxSn2jpoug+ps3Hp2i3jS/T+iV+E4+TAbU4hFhAat1GbgB46fzEB8GXCvV7qs3fIK6Yq4Sv1qKFNtzIKypKdXXimBn1rHehrRk/7JA/6F0nSIfnIDxnU7B5anUEBnnVmOJHGfhE6uh+tk+gCOJSH0Xn0D7GbXrofGWM7jeVSRQTC+xuVsJ+rGS62bLEZy0xy/xB6HfZKU6iQdeLcYgS/QZZm2hchCvmoiDV4OhUgUqSDz5dNWl5iMk/rpXqp1nT+VuDcd7fe9CaIzQvWrrOgiA5tJgBQct0XLYEDlQqUs0ghiuaDS7eq06MM7YSI1xFQytkGhbLddJPq4kG7XJBZCE0PlFbtKmwPxwxyCJWAISTEsvmjtGpO+ehOjpIehiqUqS/yjVDm1d1HModcaLuwZic8NCYtBzFJNABlwHAIFkcgERGUwl5s= root@localhost.localdomain"  # Replace this
+  key_name   = "aws_key2"
+  public_key = file("~/.ssh/aws_key2.pub")
 }
 
 resource "aws_security_group" "webapp_sg" {
@@ -51,7 +76,7 @@ resource "aws_security_group" "webapp_sg" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]  # Warning: Limit this in production!
+    cidr_blocks = ["0.0.0.0/0"] 
   }
 
   ingress {
@@ -64,13 +89,13 @@ resource "aws_security_group" "webapp_sg" {
   egress {
     from_port   = 0
     to_port     = 0
-    protocol    = "tcp"
+    protocol    = "all"
     cidr_blocks = ["0.0.0.0/0"]
   }
 }
 
 resource "aws_instance" "webapp" {
-  ami                    = "ami-0009730fa04f166e2" # Alma linux
+  ami                    = "ami-07cf213fe6e614d92" # Alma linux
   instance_type          = "t2.micro"
   subnet_id              = aws_subnet.public.id
   vpc_security_group_ids = [aws_security_group.webapp_sg.id]

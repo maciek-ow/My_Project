@@ -1,0 +1,23 @@
+- name: open port 5000 on EC2 instance
+  hosts: webapp
+  remote_user: ec2-user
+  become: yes
+  gather_facts: no
+  roles:
+    - port_open
+
+- name: Install docker
+  hosts: webapp
+  remote_user: ec2-user
+  become: yes
+  gather_facts: no
+  roles:
+    - install_docker
+
+- name: clone git repo
+  hosts: webapp
+  remote_user: ec2-user
+  become: yes
+  gather_facts: no
+  roles:
+    - copy_git_repo

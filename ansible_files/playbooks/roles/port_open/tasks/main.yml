@@ -1,0 +1,6 @@
+- name: open port 5000 on EC2 instance
+  ansible.posix.firewalld:
+    port: 5000/tcp
+    permanent: yes
+    immediate: yes
+    state: enabled

@@ -1,0 +1,9 @@
+- name: Install git
+  package:
+    name: git
+    state: present
+
+- name: clone git repo
+  ansible.builtin.git:
+    repo: 'https://github.com/maciek-ow/MVC-App.git'
+    dest: /opt/WebApp
