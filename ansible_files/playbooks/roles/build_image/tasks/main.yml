@@ -1,0 +1,12 @@
+- name: build docker image
+  community.docker.docker_image_build:
+    name: task_master:0.1.2
+    path: /opt/WebApp/app
+    dockerfile: /opt/WebApp/app/Dockerfile 
+
+- name: pull postgres image
+  community.docker.docker_image:
+    name: postgres:13
+    source: pull
+    state: present
+    force_source: true

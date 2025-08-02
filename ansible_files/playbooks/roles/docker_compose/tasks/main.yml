@@ -1,0 +1,9 @@
+- name: Start/update Docker Compose services
+  community.docker.docker_compose_v2:
+    project_src: /opt/WebApp/app
+    state: present            
+    pull: never              
+    build: never               
+    recreate: always           
+    remove_orphans: true                 
+  register: compose_output
