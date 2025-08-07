@@ -1,6 +1,6 @@
 - name: build docker image
   community.docker.docker_image_build:
-    name: task_master:0.1.2
+    name: "{{ docker_image_name }}"
     path: /opt/WebApp/app
     dockerfile: /opt/WebApp/app/Dockerfile 
 

@@ -1,3 +1,12 @@
+  
+- name: Create .env file
+  ansible.builtin.template:
+    src: templates/env.j2
+    dest: /opt/WebApp/app/.env
+    owner: ec2-user
+    group: ec2-user
+    mode: '600' # Owner can read/write, no other access
+    
 - name: Start/update Docker Compose services
   community.docker.docker_compose_v2:
     project_src: /opt/WebApp/app
@@ -7,3 +16,9 @@
     recreate: always           
     remove_orphans: true                 
   register: compose_output
+
+- name: Delete .env file
+  ansible.builtin.file:
+    path: /opt/WebApp/app/.env
+    state: absent
+  

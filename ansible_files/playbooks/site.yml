@@ -29,7 +29,7 @@
   gather_facts: no
   roles:
     - copy_git_repo
-
+      
 - name: build image
   tags: build_image
   hosts: webapp
@@ -39,6 +39,11 @@
   roles:
     - build_image
 
+  vars_prompt:
+    - name: docker_image_name
+      prompt: "Enter docker image version"
+      private: no
+      
 - name: Start/update Docker Compose services
   tags: docker_compose
   hosts: webapp
